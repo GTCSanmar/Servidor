@@ -3,12 +3,10 @@ import threading
 import os
 import hashlib
 
-# Configurações do Servidor
 HOST = '127.0.0.1' # Loopback
 PORT = 65432
 FILE_STORAGE = 'server_files'
 
-# Banco de Dados de Usuários (simulação)
 USERS = {
     "alice": "senha123",
     "bob": "securepass"
@@ -30,8 +28,7 @@ def handle_client(conn, addr):
 
     try:
         while True:
-            # Recebe o comando do cliente (tamanho fixo para o comando)
-            # Decodifica para string e remove espaços em branco
+         
             data = conn.recv(1024).decode('utf-8').strip() 
             if not data:
                 break # Conexão fechada
@@ -57,7 +54,6 @@ def handle_client(conn, addr):
                     conn.sendall("ERROR Formato de LOGIN inválido.".encode('utf-8'))
 
             elif not logged_in_user:
-                # Bloqueia comandos que exigem login
                 conn.sendall("ERROR Faça login primeiro.".encode('utf-8'))
             
             elif command == "LOGOUT":
@@ -80,7 +76,6 @@ def handle_client(conn, addr):
                     filepath = os.path.join(FILE_STORAGE, logged_in_user, filename)
                     bytes_received = 0
                     
-                    # Recebe os bytes do arquivo
                     with open(filepath, 'wb') as f:
                         while bytes_received < file_size:
                             chunk = conn.recv(min(file_size - bytes_received, 4096))
@@ -108,14 +103,11 @@ def handle_client(conn, addr):
                         # 1. Envia metadados (pronto para enviar + nome + tamanho)
                         conn.sendall(f"READY_TO_SEND {filename} {file_size}".encode('utf-8'))
                         
-                        # Espera um ACK (Confirmação) do cliente antes de enviar os dados
-                        # para evitar que os dados do arquivo se misturem com a resposta
                         ack = conn.recv(1024).decode('utf-8').strip()
                         if ack != "ACK_READY":
                             print(f"ERRO: Cliente não confirmou prontidão.")
                             continue
 
-                        # 2. Envia os bytes do arquivo
                         with open(filepath, 'rb') as f:
                             while True:
                                 bytes_read = f.read(4096)
@@ -149,9 +141,7 @@ def start_server():
         print(f"[*] Servidor escutando em {HOST}:{PORT}")
 
         while True:
-            # Aceita uma nova conexão
             conn, addr = server_socket.accept()
-            # Inicia uma nova thread para lidar com o cliente
             client_thread = threading.Thread(target=handle_client, args=(conn, addr,))
             client_thread.start()
 
@@ -161,4 +151,5 @@ def start_server():
         server_socket.close()
 
 if __name__ == "__main__":
+
     start_server()
