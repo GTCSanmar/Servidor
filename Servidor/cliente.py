@@ -2,7 +2,6 @@ import socket
 import os
 import sys
 
-# Configurações
 HOST = '127.0.0.1' 
 PORT = 65432
 BUFFER_SIZE = 4096 
@@ -11,10 +10,8 @@ DOWNLOAD_DIR = 'client_downloads'
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
 
-# --- Funções do Cliente ---
 
 def connect_to_server():
-    """Cria e retorna o socket conectado."""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.connect((HOST, PORT))
@@ -24,13 +21,11 @@ def connect_to_server():
         sys.exit()
 
 def send_and_receive(sock, command):
-    """Envia um comando simples e espera a resposta inicial do servidor."""
     sock.sendall(command.encode('utf-8'))
     response = sock.recv(1024).decode('utf-8').strip()
     return response
 
 def handle_upload(sock, filename):
-    """Lida com a lógica de Upload de um arquivo."""
     if not os.path.exists(filename):
         print(f"Erro: Arquivo local '{filename}' não encontrado.")
         return
@@ -57,7 +52,6 @@ def handle_upload(sock, filename):
     print(f"Servidor: {final_response}")
 
 def handle_download(sock, filename):
-    """Lida com a lógica de Download de um arquivo."""
     
     command = f"DOWNLOAD {filename}"
     sock.sendall(command.encode('utf-8'))
@@ -97,7 +91,6 @@ def handle_download(sock, filename):
             print(f"AVISO: Download de {received_filename} incompleto. {bytes_received}/{file_size}")
 
 def main_client():
-    """Loop principal do cliente (interface de linha de comando)."""
     sock = connect_to_server()
     print("Conectado ao servidor de arquivos. Use 'HELP' para comandos.")
     
@@ -156,3 +149,4 @@ def main_client():
 if __name__ == "__main__":
 
     main_client()
+
