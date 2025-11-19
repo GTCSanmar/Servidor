@@ -37,17 +37,14 @@ def handle_upload(sock, filename):
 
     file_size = os.path.getsize(filename)
     
-    # 1. Envia comando UPLOAD com metadados
     command = f"UPLOAD {os.path.basename(filename)} {file_size}"
     sock.sendall(command.encode('utf-8'))
     
-    # 2. Espera a confirmação do servidor
     response = sock.recv(1024).decode('utf-8').strip()
     if not response.startswith("READY_TO_RECEIVE"):
         print(f"Erro no servidor: {response}")
         return
 
-    # 3. Envia os bytes do arquivo
     print(f"Iniciando upload de {filename} ({file_size} bytes)...")
     with open(filename, 'rb') as f:
         while True:
@@ -56,18 +53,15 @@ def handle_upload(sock, filename):
                 break
             sock.sendall(bytes_read)
 
-    # 4. Recebe a confirmação final
     final_response = sock.recv(1024).decode('utf-8').strip()
     print(f"Servidor: {final_response}")
 
 def handle_download(sock, filename):
     """Lida com a lógica de Download de um arquivo."""
     
-    # 1. Envia o comando DOWNLOAD
     command = f"DOWNLOAD {filename}"
     sock.sendall(command.encode('utf-8'))
 
-    # 2. Recebe metadados (tamanho e status) do servidor
     response = sock.recv(1024).decode('utf-8').strip()
     
     if response.startswith("ERROR"):
@@ -82,10 +76,8 @@ def handle_download(sock, filename):
             print("Erro: Metadados de download inválidos.")
             return
 
-        # 3. Confirma que está pronto para receber
         sock.sendall("ACK_READY".encode('utf-8'))
         
-        # 4. Recebe e salva os bytes do arquivo
         filepath = os.path.join(DOWNLOAD_DIR, received_filename)
         print(f"Iniciando download de {received_filename} ({file_size} bytes) para {filepath}...")
         
@@ -143,7 +135,6 @@ def main_client():
             break
 
         elif command == "EXIT" or command == "QUIT":
-            # Envia LOGOUT se a conexão ainda estiver ativa
             sock.sendall("LOGOUT".encode('utf-8')) 
             break
 
@@ -163,4 +154,5 @@ def main_client():
     print("Conexão encerrada.")
 
 if __name__ == "__main__":
+
     main_client()
