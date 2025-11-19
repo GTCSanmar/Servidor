@@ -3,7 +3,7 @@ import threading
 import os
 import hashlib
 
-HOST = '127.0.0.1' # Loopback
+HOST = '127.0.0.1' 
 PORT = 65432
 FILE_STORAGE = 'server_files'
 
@@ -15,14 +15,11 @@ USERS = {
 if not os.path.exists(FILE_STORAGE):
     os.makedirs(FILE_STORAGE)
 
-# --- Funções de Ajuda ---
 
 def authenticate_user(username, password):
-    """Verifica credenciais."""
     return USERS.get(username) == password
 
 def handle_client(conn, addr):
-    """Lida com as requisições de um cliente específico em uma thread."""
     print(f"[*] Nova conexão de {addr}")
     logged_in_user = None
 
@@ -31,19 +28,17 @@ def handle_client(conn, addr):
          
             data = conn.recv(1024).decode('utf-8').strip() 
             if not data:
-                break # Conexão fechada
+                break 
 
             parts = data.split()
             command = parts[0].upper()
 
-            # --- Tratamento de Comandos ---
 
             if command == "LOGIN":
                 if len(parts) == 3:
                     username, password = parts[1], parts[2]
                     if authenticate_user(username, password):
                         logged_in_user = username
-                        # Cria o diretório do usuário se não existir
                         if not os.path.exists(os.path.join(FILE_STORAGE, username)):
                             os.makedirs(os.path.join(FILE_STORAGE, username))
                         conn.sendall("SUCCESS Login bem-sucedido.".encode('utf-8'))
@@ -100,7 +95,6 @@ def handle_client(conn, addr):
                     
                     if os.path.exists(filepath):
                         file_size = os.path.getsize(filepath)
-                        # 1. Envia metadados (pronto para enviar + nome + tamanho)
                         conn.sendall(f"READY_TO_SEND {filename} {file_size}".encode('utf-8'))
                         
                         ack = conn.recv(1024).decode('utf-8').strip()
@@ -130,10 +124,8 @@ def handle_client(conn, addr):
         print(f"[*] Conexão com {addr} encerrada.")
         conn.close()
 
-# --- Loop Principal do Servidor ---
 
 def start_server():
-    """Inicia o servidor e escuta por conexões."""
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         server_socket.bind((HOST, PORT))
@@ -153,3 +145,4 @@ def start_server():
 if __name__ == "__main__":
 
     start_server()
+
